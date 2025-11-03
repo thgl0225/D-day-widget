@@ -74,7 +74,8 @@
             font-size: 10px;
             background: #fffafa;
             transition: border-color 0.3s, box-shadow 0.3s;
-            font-family: 'Gowun Batang', sans-serif; 
+            /* 입력창 폰트를 Poppins로 통일 */
+            font-family: 'Poppins', sans-serif; 
         }
 
         input:focus { outline: none; border-color: var(--theme-main); box-shadow: 0 0 5px rgba(var(--theme-shadow-rgb), 0.5); }
@@ -110,11 +111,11 @@
             font-weight: 600; 
         }
         
-        /* 🌟 D-day 숫자 폰트: Poppins (Bold) 적용 🌟 */
+        /* D-day 숫자 폰트: Poppins (Bold) 적용 */
         .dday-number { 
             font-size: 30px;
-            font-weight: 700; /* Poppins Bold 굵기 */
-            font-family: 'Poppins', sans-serif; /* 🌟 Poppins 폰트 적용 🌟 */
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif; 
             background: linear-gradient(135deg, var(--dday-start-color) 0%, var(--dday-end-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -142,7 +143,7 @@
                 <input type="text" id="eventName" placeholder="예: 생일, 중요한 날">
             </div>
             <div class="input-group">
-                <label for="targetDate">목표 날짜</label>
+                <label for="targetDate">날짜</label>
                 <input type="date" id="targetDate">
             </div>
             
@@ -181,6 +182,11 @@
         const root = document.documentElement;
         
         function hexToRgb(hex) {
+            const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+            hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                return r + r + g + g + b + b;
+            });
+
             const bigint = parseInt(hex.slice(1), 16);
             const r = (bigint >> 16) & 255;
             const g = (bigint >> 8) & 255;
@@ -208,14 +214,17 @@
 
         function hideModal(event, modalId) {
             const modal = document.getElementById(modalId);
+            // 모달 백드롭을 클릭했을 때만 닫기
             if (event && event.target !== modal) {
                 return;
             }
             modal.style.display = 'none';
         }
 
+        let ddayInterval; // 실시간 업데이트를 위한 전역 변수
+
         function setDday() {
-            const eventName = document.getElementById('eventName').value;
+            const eventName = document.getElementById('eventName').value.trim();
             const targetDate = document.getElementById('targetDate').value;
             if (!eventName || !targetDate) {
                 showModal('이벤트 이름과 날짜를 모두 입력해주세요!');
@@ -223,10 +232,16 @@
             }
             data.eventName = eventName;
             data.targetDate = targetDate;
+            
+            // D-day를 설정하면 즉시 업데이트 시작
+            if (ddayInterval) clearInterval(ddayInterval);
             updateDisplay();
+            ddayInterval = setInterval(updateDisplay, 1000 * 60); // 1분마다 업데이트
         }
 
         function updateDisplay() {
+            if (!data.targetDate) return; // 데이터가 없으면 업데이트 안 함
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const target = new Date(data.targetDate);
@@ -256,12 +271,15 @@
             document.getElementById('targetDate').value = '';
             document.getElementById('inputForm').style.display = 'block';
             document.getElementById('ddayDisplay').classList.remove('show');
+            
+            if (ddayInterval) clearInterval(ddayInterval);
+            data.eventName = '';
+            data.targetDate = '';
         }
 
-        // 과거 날짜 선택 가능하도록 유지
-        document.getElementById('targetDate').removeAttribute('min');
-        
-        document.addEventListener('DOMContentLoaded', updateThemeColor);
+        document.addEventListener('DOMContentLoaded', () => {
+             updateThemeColor();
+        });
     </script>
 </body>
 </html>
