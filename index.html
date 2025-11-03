@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-day 카운터</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- 변수 설정 (파스텔 핑크 테마) --- */
+        :root {
+            --soft-pink: #fce4ec;
+            --main-pink: #ff80ab;
+            --dark-pink: #f50057;
+            --text-pink: #ff4081;
+            --shadow-color: rgba(255, 128, 171, 0.4);
+            --dday-start-color: #ff99cc;
+            --dday-end-color: #ff4d94;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: none; /* 전체 배경을 투명으로 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        /* --- 컨테이너: 위젯 크기 축소 및 배경 제거 --- */
+        .container {
+            background: none;
+            border-radius: 0;
+            padding: 0;
+            width: 100%;
+            max-width: 180px; /* 위젯 크기 줄이기 */
+            box-shadow: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-group {
+            margin-bottom: 8px; /* 위젯 크기 줄이기 */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text-pink);
+            font-weight: 700;
+            font-size: 10px; /* 글자 크기 줄이기 */
+            letter-spacing: 0.5px;
+        }
+
+        #inputForm {
+            background: #ffffff;
+            border-radius: 12px; /* 배경 둥글게 */
+            padding: 10px;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            border: 2px solid var(--soft-pink);
+            width: 100%;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 6px 10px; /* 입력 박스 크기 줄이기 */
+            border: 2px solid var(--soft-pink);
+            border-radius: 12px;
+            font-size: 10px; /* 입력 글자 크기 줄이기 */
+            background: #fffafa;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--main-pink);
+            box-shadow: 0 0 5px var(--shadow-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(135deg, var(--main-pink) 0%, var(--dark-pink) 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px; /* 버튼 글자 크기 줄이기 */
+            font-weight: 700;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            margin-top: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        /* --- D-day 표시 영역 --- */
+        .dday-display {
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+            border-radius: 20px;
+            padding: 12px;
+            background: #fff;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            border: 2px dashed var(--soft-pink);
+            width: 100%;
+            position: relative;
+        }
+
+        .dday-display.show {
+            display: block;
+        }
+
+        .event-name {
+            font-size: 12px; /* 이벤트 이름 크기 줄이기 */
+            color: #444;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .dday-number {
+            font-size: 30px; /* D-day 숫자 크기 줄이기 */
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--dday-start-color) 0%, var(--dday-end-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 6px 0;
+            text-shadow: 0 0 5px var(--shadow-color);
+        }
+
+        .target-date {
+            font-size: 11px; /* 날짜 텍스트 크기 줄이기 */
+            color: #777;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        /* --- 재설정 버튼: 이모티콘만 표시 --- */
+        .reset-btn {
+            background: none;
+            color: #ff80ab; /* 연한 분홍색 */
+            font-size: 24px; /* 이모티콘 크기 */
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            color: #ff4d94; /* hover시 진한 분홍색 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="inputForm">
+            <div class="input-group">
+                <label for="eventName">✨ 이벤트 이름</label>
+                <input type="text" id="eventName" placeholder="예: 생일, 중요한 날">
+            </div>
+            <div class="input-group">
+                <label for="targetDate">💖 목표 날짜</label>
+                <input type="date" id="targetDate">
+            </div>
+            <button onclick="setDday()">D-day 설정</button>
+        </div>
+
+        <div id="ddayDisplay" class="dday-display">
+            <div class="event-name" id="displayEventName"></div>
+            <div class="dday-number" id="ddayNumber"></div>
+            <div class="target-date" id="displayTargetDate"></div>
+            <button class="reset-btn" onclick="resetDday()">🔄</button>
+        </div>
+    </div>
+
+    <script>
+        const data = { eventName: '', targetDate: '' };
+
+        function setDday() {
+            const eventName = document.getElementById('eventName').value;
+            const targetDate = document.getElementById('targetDate').value;
+
+            if (!eventName || !targetDate) {
+                alert('이벤트 이름과 날짜를 모두 입력해주세요!');
+                return;
+            }
+
+            data.eventName = eventName;
+            data.targetDate = targetDate;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const target = new Date(data.targetDate);
+            target.setHours(0, 0, 0, 0);
+
+            const diffTime = target - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            document.getElementById('displayEventName').textContent = data.eventName;
+            document.getElementById('displayTargetDate').textContent = target.toLocaleDateString('ko-KR');
+
+            if (diffDays > 0) {
+                document.getElementById('ddayNumber').textContent = `D-${diffDays}`;
+            } else if (diffDays === 0) {
+                document.getElementById('ddayNumber').textContent = 'D-DAY';
+            } else {
+                document.getElementById('ddayNumber').textContent = `D+${Math.abs(diffDays)}`;
+            }
+
+            document.getElementById('inputForm').style.display = 'none';
+            document.getElementById('ddayDisplay').classList.add('show');
+        }
+
+        function resetDday() {
+            document.getElementById('eventName').value = '';
+            document.getElementById('targetDate').value = '';
+            document.getElementById('inputForm').style.display = 'block';
+            document.getElementById('ddayDisplay').classList.remove('show');
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('targetDate').setAttribute('min', today);
+    </script>
+</body>
+</html>
