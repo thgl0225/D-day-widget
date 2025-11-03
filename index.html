@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D-day 카운터</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- 변수 설정 (파스텔 핑크 테마) --- */
+        /* --- 변수 설정 (사용자 설정 가능) --- */
         :root {
-            --soft-pink: #fce4ec;
-            --main-pink: #ff80ab;
-            --dark-pink: #f50057;
-            --text-pink: #ff4081;
-            --shadow-color: rgba(255, 128, 171, 0.4);
-            --dday-start-color: #ff99cc;
-            --dday-end-color: #ff4d94;
+            --theme-main: #ff80ab; 
+            --theme-shadow-rgb: 255, 128, 171; 
+            --dday-start-color: #ff99cc; 
+            --dday-end-color: #ff80ab;
+            --soft-bg: #fce4ec; 
+            --modal-bg: #fff0f7;
         }
 
         * {
@@ -24,180 +26,201 @@
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background: none; /* 전체 배경을 투명으로 */
+            /* 기본 폰트: Gowun Batang (고운 바탕) 유지 */
+            font-family: 'Gowun Batang', 'Poppins', sans-serif; 
+            background: none; 
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 15px;
-        }
-
-        /* --- 컨테이너: 위젯 크기 축소 및 배경 제거 --- */
-        .container {
-            background: none;
-            border-radius: 0;
-            padding: 0;
-            width: 100%;
-            max-width: 180px; /* 위젯 크기 줄이기 */
-            box-shadow: none;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .input-group {
-            margin-bottom: 8px; /* 위젯 크기 줄이기 */
-        }
-
-        label {
-            display: block;
-            margin-bottom: 4px;
-            color: var(--text-pink);
-            font-weight: 700;
-            font-size: 10px; /* 글자 크기 줄이기 */
-            letter-spacing: 0.5px;
-        }
-
-        #inputForm {
-            background: #ffffff;
-            border-radius: 12px; /* 배경 둥글게 */
-            padding: 10px;
-            box-shadow: 0 4px 10px var(--shadow-color);
-            border: 2px solid var(--soft-pink);
-            width: 100%;
-        }
-
-        input[type="text"],
-        input[type="date"] {
-            width: 100%;
-            padding: 6px 10px; /* 입력 박스 크기 줄이기 */
-            border: 2px solid var(--soft-pink);
-            border-radius: 12px;
-            font-size: 10px; /* 입력 글자 크기 줄이기 */
-            background: #fffafa;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--main-pink);
-            box-shadow: 0 0 5px var(--shadow-color);
-        }
-
-        button {
-            width: 100%;
-            padding: 8px;
-            background: linear-gradient(135deg, var(--main-pink) 0%, var(--dark-pink) 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-size: 12px; /* 버튼 글자 크기 줄이기 */
-            font-weight: 700;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            margin-top: 8px;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px var(--shadow-color);
-        }
-
-        /* --- D-day 표시 영역 --- */
-        .dday-display {
-            margin-top: 12px;
-            text-align: center;
-            display: none;
-            border-radius: 20px;
-            padding: 12px;
-            background: #fff;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            border: 2px dashed var(--soft-pink);
-            width: 100%;
             position: relative;
         }
 
-        .dday-display.show {
-            display: block;
+        /* --- 모달 (팝업창) 스타일 --- */
+        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.15); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: var(--modal-bg); padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(var(--theme-shadow-rgb), 0.3); text-align: center; width: 150px; border: 2px solid var(--theme-main); transform: scale(0.95); }
+        .modal-message { font-size: 11px; color: #444; margin-bottom: 15px; font-weight: 600; }
+        .modal-button { 
+            padding: 6px 15px; background: var(--theme-main); color: white; border: none; border-radius: 15px; font-size: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s; 
+            font-family: 'Gowun Batang', sans-serif; 
+        }
+        .modal-button:hover { background: rgba(var(--theme-shadow-rgb), 0.8); }
+        #settingsModal .modal-content { width: 170px; padding: 15px; }
+        #settingsModal h4 { font-size: 13px; color: var(--theme-main); margin-bottom: 10px; font-weight: 700; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .setting-label { font-size: 10px; color: #555; font-weight: 600; }
+        #settingsModal .modal-button { width: 100%; margin-top: 5px; padding: 8px; font-size: 11px; }
+        #settingsModal input[type="color"] { width: 20px; height: 20px; padding: 0; border: 2px solid #ffffff; border-radius: 50%; cursor: pointer; background-color: var(--theme-main); margin-left: 10px; -webkit-appearance: none; -moz-appearance: none; appearance: none; box-shadow: 0 0 3px rgba(0, 0, 0, 0.2); }
+        #settingsModal input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        #settingsModal input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+        
+        /* --- 위젯 컨테이너 --- */
+        .container { background: none; padding: 0; width: 100%; max-width: 180px; box-shadow: none; border: none; display: flex; flex-direction: column; align-items: center; }
+        
+        /* 들여쓰기 유지 */
+        .input-group { margin-bottom: 8px; padding-left: 5px; }
+        
+        label { display: block; margin-bottom: 4px; color: var(--theme-main); font-weight: 700; font-size: 10px; letter-spacing: 0.5px; }
+        #inputForm { background: #ffffff; border-radius: 12px; padding: 10px; box-shadow: 0 4px 10px rgba(var(--theme-shadow-rgb), 0.2); border: 2px solid var(--soft-bg); width: 100%; position: relative; }
+        
+        /* --- 텍스트 및 날짜 입력 필드 스타일 --- */
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 6px 10px;
+            border: 2px solid var(--soft-bg);
+            border-radius: 12px;
+            font-size: 10px;
+            background: #fffafa;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: 'Gowun Batang', sans-serif; 
         }
 
-        .event-name {
-            font-size: 12px; /* 이벤트 이름 크기 줄이기 */
-            color: #444;
-            margin-bottom: 6px;
-            font-weight: 600;
+        input:focus { outline: none; border-color: var(--theme-main); box-shadow: 0 0 5px rgba(var(--theme-shadow-rgb), 0.5); }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: none; cursor: pointer; opacity: 1.0; }
+        
+        /* --- 설정 버튼 (폰트 통일) --- */
+        button:not(.setting-btn, .modal-button) {
+            width: 100%;
+            padding: 8px;
+            background: var(--theme-main);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(var(--theme-shadow-rgb), 0.4);
+            margin-top: 4px; 
+            cursor: pointer;
+            font-family: 'Gowun Batang', sans-serif; 
         }
 
-        .dday-number {
-            font-size: 30px; /* D-day 숫자 크기 줄이기 */
-            font-weight: 900;
+        button:not(.setting-btn, .modal-button):hover { transform: translateY(-2px); background: rgba(var(--theme-shadow-rgb), 0.8); box-shadow: 0 6px 12px rgba(var(--theme-shadow-rgb), 0.6); }
+
+        /* --- D-day 표시 영역 --- */
+        .dday-display { margin-top: 12px; text-align: center; display: none; border-radius: 20px; padding: 12px; background: #fff; box-shadow: 0 4px 12px rgba(var(--theme-shadow-rgb), 0.3); border: 2px dashed var(--soft-bg); width: 100%; position: relative; }
+        .dday-display.show { display: block; }
+        
+        /* 간격 및 제목 크기 유지 */
+        .event-name { 
+            font-size: 15px; 
+            color: #444; 
+            margin-bottom: 3px; 
+            font-weight: 600; 
+        }
+        
+        /* 🌟 D-day 숫자 폰트: Poppins (Bold) 적용 🌟 */
+        .dday-number { 
+            font-size: 30px;
+            font-weight: 700; /* Poppins Bold 굵기 */
+            font-family: 'Poppins', sans-serif; /* 🌟 Poppins 폰트 적용 🌟 */
             background: linear-gradient(135deg, var(--dday-start-color) 0%, var(--dday-end-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin: 6px 0;
-            text-shadow: 0 0 5px var(--shadow-color);
+            margin: 3px 0; 
+            text-shadow: 0 0 5px rgba(var(--theme-shadow-rgb), 0.4);
         }
-
-        .target-date {
-            font-size: 11px; /* 날짜 텍스트 크기 줄이기 */
-            color: #777;
-            margin-top: 6px;
-            font-style: italic;
-        }
-
-        /* --- 재설정 버튼: 이모티콘만 표시 --- */
-        .reset-btn {
-            background: none;
-            color: #ff80ab; /* 연한 분홍색 */
-            font-size: 24px; /* 이모티콘 크기 */
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .reset-btn:hover {
-            color: #ff4d94; /* hover시 진한 분홍색 */
-        }
+        
+        .target-date { font-size: 11px; color: #777; margin-top: 6px; font-style: italic; }
+        
+        /* --- 설정 톱니바퀴 버튼 --- */
+        .setting-btn { background: none; color: var(--theme-main); font-size: 14px; opacity: 0.6; font-weight: normal; width: auto; padding: 0; margin: 0; border: none; box-shadow: none; position: absolute; top: 4px; right: 4px; transition: opacity 0.2s, transform 0.2s; cursor: pointer; z-index: 50; }
+        .setting-btn:hover { opacity: 1.0; color: var(--theme-main); transform: rotate(15deg); }
+        
     </style>
 </head>
-<body>
+<body onload="updateThemeColor()">
     <div class="container">
+        
         <div id="inputForm">
+            <button class="setting-btn" onclick="showSettingsModal()">⚙️</button>
+            
             <div class="input-group">
-                <label for="eventName">✨ 이벤트 이름</label>
+                <label for="eventName">이벤트 이름</label>
                 <input type="text" id="eventName" placeholder="예: 생일, 중요한 날">
             </div>
             <div class="input-group">
-                <label for="targetDate">💖 목표 날짜</label>
+                <label for="targetDate">목표 날짜</label>
                 <input type="date" id="targetDate">
             </div>
+            
             <button onclick="setDday()">D-day 설정</button>
         </div>
 
         <div id="ddayDisplay" class="dday-display">
+            <button class="setting-btn" onclick="showSettingsModal()">⚙️</button>
             <div class="event-name" id="displayEventName"></div>
             <div class="dday-number" id="ddayNumber"></div>
             <div class="target-date" id="displayTargetDate"></div>
-            <button class="reset-btn" onclick="resetDday()">🔄</button>
+        </div>
+    </div>
+    
+    <div id="settingsModal" class="modal-backdrop" onclick="hideModal(event, 'settingsModal')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h4>위젯 설정</h4>
+            <div class="setting-row">
+                <span class="setting-label">테마 색상 변경</span>
+                <input type="color" id="themeColor" value="#ff80ab" oninput="updateThemeColor()">
+            </div>
+            <button class="modal-button" onclick="resetDday()">입력 초기화 (재설정)</button>
+            <button class="modal-button" onclick="hideModal(null, 'settingsModal')" style="margin-top: 10px;">닫기</button>
+        </div>
+    </div>
+
+    <div id="modalAlert" class="modal-backdrop" onclick="hideModal(event, 'modalAlert')">
+        <div class="modal-content">
+            <div class="modal-message" id="modalMessage"></div>
+            <button class="modal-button" onclick="hideModal(null, 'modalAlert')">확인</button>
         </div>
     </div>
 
     <script>
         const data = { eventName: '', targetDate: '' };
+        const root = document.documentElement;
+        
+        function hexToRgb(hex) {
+            const bigint = parseInt(hex.slice(1), 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        function updateThemeColor() {
+            const newColor = document.getElementById('themeColor').value;
+            const rgb = hexToRgb(newColor);
+            root.style.setProperty('--theme-main', newColor);
+            root.style.setProperty('--theme-shadow-rgb', rgb);
+            root.style.setProperty('--dday-start-color', newColor + '99'); 
+            root.style.setProperty('--dday-end-color', newColor); 
+        }
+
+        function showModal(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalAlert').style.display = 'flex';
+        }
+        
+        function showSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function hideModal(event, modalId) {
+            const modal = document.getElementById(modalId);
+            if (event && event.target !== modal) {
+                return;
+            }
+            modal.style.display = 'none';
+        }
 
         function setDday() {
             const eventName = document.getElementById('eventName').value;
             const targetDate = document.getElementById('targetDate').value;
-
             if (!eventName || !targetDate) {
-                alert('이벤트 이름과 날짜를 모두 입력해주세요!');
+                showModal('이벤트 이름과 날짜를 모두 입력해주세요!');
                 return;
             }
-
             data.eventName = eventName;
             data.targetDate = targetDate;
             updateDisplay();
@@ -206,10 +229,9 @@
         function updateDisplay() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-
             const target = new Date(data.targetDate);
             target.setHours(0, 0, 0, 0);
-
+            
             const diffTime = target - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -229,14 +251,17 @@
         }
 
         function resetDday() {
+            hideModal(null, 'settingsModal');
             document.getElementById('eventName').value = '';
             document.getElementById('targetDate').value = '';
             document.getElementById('inputForm').style.display = 'block';
             document.getElementById('ddayDisplay').classList.remove('show');
         }
 
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('targetDate').setAttribute('min', today);
+        // 과거 날짜 선택 가능하도록 유지
+        document.getElementById('targetDate').removeAttribute('min');
+        
+        document.addEventListener('DOMContentLoaded', updateThemeColor);
     </script>
 </body>
 </html>
